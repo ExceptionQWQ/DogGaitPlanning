@@ -15,6 +15,8 @@ public:
     LegViewer(cv::Size window_size, struct LegParam leg_param);
     ~LegViewer();
 
+    void set_r_ab(double r_a, double r_b);
+
     cv::Mat get_view();
 
 
@@ -48,12 +50,18 @@ LegViewer::~LegViewer()
 
 }
 
+void LegViewer::set_r_ab(double r_a, double r_b)
+{
+    m_leg_param.r_a = r_a;
+    m_leg_param.r_b = r_b;
+}
+
 /*
  * @brief 获取腿的可视化图像，正运动学
  */
 cv::Mat LegViewer::get_view()
 {
-    cv::Mat view(m_window_size, CV_8UC3);
+    cv::Mat view = cv::Mat::zeros(m_window_size, CV_8UC3);
     draw_xy_coord(view);
 
     //求解C点坐标
@@ -90,28 +98,34 @@ cv::Mat LegViewer::get_view()
     draw_line(view, coord_d, coord_e, cv::Scalar(255, 0, 0), 3);
 
     //求解F点坐标
-    double dx = coord_e.x - coord_d.x;
-    double dy = coord_e.y - coord_d.y;
-    double scale_factor = m_leg_param.l5 / m_leg_param.l4;
-    cv::Point2d coord_f(coord_e.x + dx * scale_factor, coord_e.y + dy * scale_factor);
+    cv::Point2d coord_f = coord_e + (coord_e - coord_d) * (m_leg_param.l5 / m_leg_param.l4);
     //draw l5
     draw_line(view, coord_e, coord_f, cv::Scalar(255, 0, 0), 3);
 
     //显示F点坐标
     char hint_f[64];
-    snprintf(hint_f, 64, "(x:%.2f, y:%.2f)", coord_f.x, coord_f.y);
+    snprintf(hint_f, 64, "F(x:%.2f, y:%.2f)", coord_f.x, coord_f.y);
     cv::putText(view, hint_f, xy_coord_to_screen_coord(coord_f), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(255, 255, 255), 1);
 
     //显示关节A角度
     char hint_a[64];
-    snprintf(hint_a, 64, "(degree:%.2f)", m_leg_param.r_a / CV_PI * 180);
+    snprintf(hint_a, 64, "A(degree:%.2f)", m_leg_param.r_a / CV_PI * 180);
     cv::putText(view, hint_a, xy_coord_to_screen_coord(coord_a), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(255, 255, 255), 1);
 
     //显示关节B角度
     char hint_b[64];
-    snprintf(hint_b, 64, "(degree:%.2f)", m_leg_param.r_b / CV_PI * 180);
+    snprintf(hint_b, 64, "B(degree:%.2f)", m_leg_param.r_b / CV_PI * 180);
     cv::putText(view, hint_b, xy_coord_to_screen_coord(coord_b), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(255, 255, 255), 1);
 
+    cv::putText(view, "C", xy_coord_to_screen_coord(coord_c), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(255, 255, 255), 1);
+    cv::putText(view, "D", xy_coord_to_screen_coord(coord_d), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(255, 255, 255), 1);
+    cv::putText(view, "E", xy_coord_to_screen_coord(coord_e), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(255, 255, 255), 1);
+
+    cv::putText(view, "L1", xy_coord_to_screen_coord((coord_b + coord_c) / 2), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(255, 255, 255), 1);
+    cv::putText(view, "L2", xy_coord_to_screen_coord((coord_c + coord_d) / 2), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(255, 255, 255), 1);
+    cv::putText(view, "L3", xy_coord_to_screen_coord((coord_a + coord_e) / 2), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(255, 255, 255), 1);
+    cv::putText(view, "L4", xy_coord_to_screen_coord((coord_d + coord_e) / 2), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(255, 255, 255), 1);
+    cv::putText(view, "L5", xy_coord_to_screen_coord((coord_e + coord_f) / 2), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(255, 255, 255), 1);
 
     return view;
 }

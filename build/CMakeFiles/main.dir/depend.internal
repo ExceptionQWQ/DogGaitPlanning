@@ -3,6 +3,7 @@
 
 CMakeFiles/main.dir/src/main.cpp.o
  /Users/mac/Desktop/机械狗步态规划/DogGaitPlanning/src/leg.hpp
+ /Users/mac/Desktop/机械狗步态规划/DogGaitPlanning/src/leg_inverse_kinematics.hpp
  /Users/mac/Desktop/机械狗步态规划/DogGaitPlanning/src/leg_viewer.hpp
  /Users/mac/Desktop/机械狗步态规划/DogGaitPlanning/src/main.cpp
  /usr/local/include/opencv4/opencv2/calib3d.hpp
